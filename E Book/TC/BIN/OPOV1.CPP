@@ -1,0 +1,31 @@
+#include<iostream.h>
+#include<conio.h>
+class first
+{
+int x,y;
+clrscr();
+public:
+  first(int a,int b)
+{
+x=a;
+y=b;
+}
+void putdata()
+{
+cout<<"x="<<x;
+cout<<"y="<<y;
+}
+friend void operator++(first);
+};
+void operator++(first&f1)
+{
+f1.x=++f1.x;
+f1.y=++f1.y;
+}
+void main()
+{
+first f1(10,15);
++f1;
+f1.putdata();
+getch();
+}

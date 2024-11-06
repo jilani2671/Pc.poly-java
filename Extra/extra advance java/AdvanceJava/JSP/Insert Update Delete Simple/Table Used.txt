@@ -1,0 +1,18 @@
+
+SQL> desc student2
+ Name                                      Null?    Type
+ ----------------------------------------- -------- --------------
+
+ SNO                                                NUMBER(5)
+ SNAME                                              VARCHAR2(20)
+ SAGE                                               NUMBER(5)
+
+SQL> select * from student2;
+
+       SNO SNAME                      SAGE
+---------- -------------------- ----------
+         1 shekhar                      25
+         2 rahul                        26
+         3 mohinesh                     26
+
+SQL>

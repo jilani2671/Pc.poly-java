@@ -1,0 +1,14 @@
+P.rohit
+{
+    TEXT-TRANSFORM: uppercase;
+    COLOR: mediumslateblue;
+    FONT-STYLE: italic;
+    BACKGROUND-COLOR: lawngreen;
+    TEXT-ALIGN: right;
+    FONT-VARIANT: small-caps;
+    TEXT-DECORATION: line-through
+}
+P.amol
+{
+    TEXT-ALIGN: center
+}

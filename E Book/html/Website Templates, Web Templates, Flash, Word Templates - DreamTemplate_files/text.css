@@ -1,0 +1,54 @@
+A:active {
+	FONT-SIZE: 11px; COLOR: #000000; FONT-FAMILY: Arial
+}
+A:link {
+	FONT-SIZE: 11px; COLOR: #000000; FONT-FAMILY: Arial
+}
+A:visited {
+	FONT-SIZE: 11px; COLOR: #000000; FONT-FAMILY: Arial
+}
+BODY {
+	FONT-SIZE: 11px; COLOR: #000000; FONT-FAMILY: Arial
+}
+LI {
+	FONT-SIZE: 11px; COLOR: #000000; FONT-FAMILY: Arial
+}
+OL {
+	FONT-SIZE: 11px; COLOR: #000000; FONT-FAMILY: Arial
+}
+TABLE {
+	FONT-SIZE: 11px; COLOR: #000000; FONT-FAMILY: Arial
+}
+TD {
+	FONT-SIZE: 11px; COLOR: #000000; FONT-FAMILY: Arial
+}
+INPUT {
+	FONT-SIZE: 11px; COLOR: #000000; FONT-FAMILY: Arial
+}
+SELECT {
+	FONT-SIZE: 11px; COLOR: #000000; FONT-FAMILY: Arial
+}
+TEXTAREA {
+	FONT-SIZE: 11px; COLOR: #000000; FONT-FAMILY: Arial
+}
+.border_preview {
+	BORDER-RIGHT: #cccccc 8px solid; PADDING-RIGHT: 0px; BORDER-TOP: #cccccc 8px solid; PADDING-LEFT: 0px; Z-INDEX: 100; BACKGROUND: #eeeeee; PADDING-BOTTOM: 0px; BORDER-LEFT: #cccccc 8px solid; PADDING-TOP: 0px; BORDER-BOTTOM: #cccccc 8px solid; POSITION: absolute
+}
+.popup_title {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; FONT-WEIGHT: bold; FONT-SIZE: 10px; PADDING-BOTTOM: 8px; VERTICAL-ALIGN: top; COLOR: #666666; PADDING-TOP: 8px; FONT-FAMILY: Arial,Tahoma, Helvetica, sans; TEXT-ALIGN: center
+}
+.preview_temp_load {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; VERTICAL-ALIGN: middle; PADDING-TOP: 0px; TEXT-ALIGN: center
+}
+.preview_temp_load IMG {
+	BORDER-RIGHT: #ffffff 1px solid; PADDING-RIGHT: 0px; BORDER-TOP: #ffffff 1px solid; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; VERTICAL-ALIGN: middle; BORDER-LEFT: #ffffff 1px solid; PADDING-TOP: 0px; BORDER-BOTTOM: #ffffff 1px solid; TEXT-ALIGN: center
+}
+#loader_container {
+	PADDING-RIGHT: 0px; PADDING-LEFT: 0px; PADDING-BOTTOM: 0px; WIDTH: 100%; PADDING-TOP: 0px; POSITION: absolute; TOP: 40%; TEXT-ALIGN: center
+}
+#loader {
+	BORDER-RIGHT: #cccccc 1px solid; PADDING-RIGHT: 8px; BORDER-TOP: #cccccc 1px solid; DISPLAY: block; PADDING-LEFT: 8px; FONT-SIZE: 10px; Z-INDEX: 255; PADDING-BOTTOM: 12px; MARGIN: 0px auto; BORDER-LEFT: #cccccc 1px solid; WIDTH: 140px; COLOR: #000000; PADDING-TOP: 12px; BORDER-BOTTOM: #cccccc 1px solid; FONT-FAMILY: Tahoma, Helvetica, sans; BACKGROUND-COLOR: #ffffff; TEXT-ALIGN: left
+}
+#progress {
+	FONT-SIZE: 1px; LEFT: 4px; WIDTH: 1px; POSITION: relative; TOP: 1px; HEIGHT: 2px; BACKGROUND-COLOR: red
+}

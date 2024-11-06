@@ -1,0 +1,45 @@
+class First
+{ 
+	synchronized void meth(String msg)
+	{
+		System.out.println("["+msg);
+		try
+		{
+			Thread.sleep(1000);
+		}
+		catch(InterruptedException e)
+		{
+			System.out.println(e);
+		}
+			System.out.println("]");
+	}
+}
+
+class MyThread implements Runnable
+{
+	Thread t;
+	First f;
+	String str;
+	MyThread(First z,String message)
+	{
+		f=z;
+		str=message;
+		t=new Thread(this);
+		t.start();
+	}
+	public void run() 
+	{
+		f.meth(str);
+	}
+}
+
+class Demo
+{
+	public static void main(String args[])
+	{
+		First f1=new First();
+		MyThread m1=new MyThread(f1,"click");
+		MyThread m2=new MyThread(f1,"plus");
+		MyThread m3=new MyThread(f1,"computer");
+	}
+}

@@ -1,0 +1,12 @@
+
+SQL> select * from student;
+
+       SNO SNAME                      SAGE
+---------- -------------------- ----------
+         1 shekhar                      25
+         2 mahen                        25
+         3 pintya                       26
+        12 mahesh                       28
+
+SQL>
+

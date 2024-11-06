@@ -1,0 +1,19 @@
+    <servlet>
+        <servlet-name>YourServlet</servlet-name>
+        <servlet-class>MyServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>YourServlet</servlet-name>
+        <url-pattern>/sachin/HisServlet</url-pattern>
+    </servlet-mapping>
+
+    <filter>
+        <filter-name>MyFilter</filter-name>
+        <filter-class>MyFilter</filter-class>
+    </filter>
+
+ <filter-mapping>
+        <filter-name>MyFilter</filter-name>
+        <servlet-name>YourServlet</servlet-name>
+    </filter-mapping>

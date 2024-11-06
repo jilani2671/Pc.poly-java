@@ -1,0 +1,39 @@
+Simple servlet code:--
+
+import javax.servlet.*;
+import javax.servlet.http.*;
+import java.io.*;
+
+public class MyServlet extends HttpServlet
+{
+   public void doGet(HttpServletRequest request,
+   HttpServletResponse response) throws IOException,ServletException
+   {
+     response.setContentType("Text/Html");
+     PrintWriter out=response.getWriter();
+ 
+     out.println("<Html>");
+     out.println("<Body>");
+     out.println("Pimpari Chinchwad Polytechnic");
+     out.println("</Body>");
+     out.println("</Html>");
+   }
+}
+
+Store file in:--
+C:\Sachin
+
+Compiling file :--
+C:\Sachin>set path="C:\Program Files\Java\jdk1.5.0\bin"
+C:\Sachin>set classpath=%classpath%;.;c:\Tomcat\common\lib\servlet.jar
+C:\Sachin>javac MyServlet.java
+
+Paste .class file in:--
+C:\Tomcat\webapps\examples\WEB-INF\classes
+
+Starting Tomcat :--
+C:\Tomcat\Startup.bat
+
+Executing servlet :--
+http://localhost:8081/examples/servlet/MyServlet
+

@@ -1,0 +1,621 @@
+<HTML>
+<HEAD>
+<TITLE>Chapter 17 -- Creating CORBA Clients</TITLE>
+
+<META>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B" ALINK="#CE2910">
+<H1><FONT SIZE=6 COLOR=#FF0000>Chapter&nbsp;17</FONT></H1>
+<H1><FONT SIZE=6 COLOR=#FF0000>Creating CORBA Clients</FONT></H1>
+<P>
+<I><B>by Ken Cartwright</B></I>
+<HR>
+<P>
+<CENTER><B><FONT SIZE=5><A NAME="CONTENTS">CONTENTS</A></FONT></B></CENTER>
+<UL>
+<LI><A HREF="#DefiningIDLInterfaces">
+Defining IDL Interfaces</A>
+<LI><A HREF="#CompilingIDLInterfacesforJavaClients">
+Compiling IDL Interfaces for Java Clients</A>
+<LI><A HREF="#WritingaClientApplet">
+Writing a Client Applet</A>
+<LI><A HREF="#HandlingExceptions">
+Handling Exceptions</A>
+<LI><A HREF="#CGIProgramsJavanetandJavaioMayNotBetheBestChoices">
+CGI Programs, Java.net.*, and Java.io.* May Not Be the Best
+Choices</A>
+<LI><A HREF="#UsingtheDynamicInvocationInterfaceandtheInterfaceRepository">
+Using the Dynamic Invocation Interface and the Interface Repository
+</A>
+<LI><A HREF="#UsingFilters">
+Using Filters</A>
+<LI><A HREF="#SomePointsAboutDistributedSystemArchitecture">
+Some Points About Distributed System Architecture</A>
+</UL>
+
+<HR>
+<P>
+The combination of Java and CORBA is a very positive development
+for client/server systems. While CORBA is the leading heterogeneous
+distributed system standard, Java provides an extremely portable
+and powerful mechanism for the development of client-side functionality.
+And, due to the marriage of these two technologies, many client/server
+applications that were previously cost-prohibitive are now cost-effective.
+This situation results from the simple fact that Java and CORBA
+solve technical problems and simplify many aspects of client/server
+development and deployment. More specifically, Java and CORBA
+provide standards-based heterogeneous inter-process communication,
+client-side deployment, flexible decoupling of clients and servers,
+portable client-side functionality, and abstraction of some of
+the more time-consuming aspects of programming in general. This
+chapter highlights and illustrates some of the ways that CORBA
+enhances the client/server capabilities of Java-based client applications.
+<H2><A NAME="DefiningIDLInterfaces"><FONT SIZE=5 COLOR=#FF0000>
+Defining IDL Interfaces</FONT></A></H2>
+<P>
+Although this is a chapter on writing CORBA-enabled Java clients
+rather than servers, a few words about the definition of IDL interfaces
+are appropriate in order to convey the context of CORBA client
+interoperability. CORBA's Interface Definition Language (IDL)
+is a declarative language used to define the interfaces that may
+be called by a client process. The nature of an IDL interface
+may vary dramatically from one distributed application to the
+next. IDL interfaces will vary from very coarse and generic to
+very fine-grained and specific. Where an interface lies in this
+continuum will likely depend on some variation of the following
+factors:
+<UL>
+<LI>Are the clients and servers being developed independently?
+<LI>Will there be many different clients and/or many servers which
+must cooperate?
+<LI>Is the server intended to provide a wide variety of services?
+</UL>
+<P>
+If the answer to any two of the above questions is yes, then look
+into the possibility of defining your server's interface(s) in
+a more coarse and generic fashion. This can significantly enhance
+the extensibility and longevity of your distributed system. As
+new servers and clients are introduced to your distributed system
+there will be much less likelihood that existing clients and servers
+will need to change. An example of a coarse and generic interface
+is one that has a comparatively small number of IDL interfaces
+defined, uses some of the more generic IDL types as function parameters
+(for example, <TT>NameValuePairs</TT>,
+<TT>any</TT>), and has functions that
+are not specific to the services provided by the server. An example
+of a rather specific interface is the one following. This IDL
+interface describes the server functionality invoked by the client
+applet which forms the basis for the examples in this chapter.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 17.1&nbsp;&nbsp;CHAPT17LISTINGS.TXT-Notebook Server
+IDL Interface<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+interface NotebookIF
+{
+   typedef sequence&lt;string&gt; stringListType;  //resizeable list of strings
+   typedef exception AccessNotAuthorizedExc;  // user access denied
+   typedef exception NoSuchBookExc{string bookName;};  // no such notebook
+   typedef exception NoSuchPageExc{string pageName;};  //no such page
+
+   //each user must provide a user name and password
+   short authorizeUser(in string userName, in string password)
+                       raises(AccessNotAuthorizedExc);
+   //the list of existing notebooks is returned
+   stringListType getBooks(in string userName, in string password) 
+                           raises(AccessNotAuthorizedExc);
+   //the list of existing notebook pages is returned
+   stringListType  getPages(in string bookName,
+                            in string userName,
+                            in string password) 
+                            raises(AccessNotAuthorizedExc, NoSuchBookExc);
+   //retrieves the contents of a notebook page
+   string retrievePage(in string bookName, in string pageName,
+                       in string userName, in string password) 
+                       raises(AccessNotAuthorizedExc,
+                              NoSuchPageExc,
+                              NoSuchBookExc);
+   //saves the contents of a notebook page
+   short savePage(in string bookName,
+                  in string pageName,
+                  in string pageContent,
+                  in string userName,
+                  in string password) 
+                  raises(AccessNotAuthorizedExc, NoSuchBookExc);
+};
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR VALIGN=TOP><TD><B>Note</B></TD></TR>
+<TR VALIGN=TOP><TD>
+<BLOCKQUOTE>
+As a footnote, it has become a popular convention to arrive at the name of the class which implements an IDL interface by taking the name of the interface to be implemented and suffixing it with an abbreviation of the word &quot;implementation.&quot; Using 
+
+the Web-based notebook server as an example, this convention would result in an IDL interface named &quot;<TT>Notebook</TT>&quot; and an implementation class called &quot;<TT>Notebook_impl</TT>&quot;. While this seems reasonable on the surface, the fact 
+that this is an ORB-centric convention can present a problem as the server evolves through the development process. The problem arises when it becomes necessary to change the classes or services which are ORB-enabled (have IDL interfaces), or when it 
+becomes necessary to alter the way in which classes implement the IDL interfaces. If a service that has not been previously ORB-enabled must become so, it will then be necessary to change the name of the class implementing that service to add the 
+&quot;impl&quot; suffix. Worse yet, a change to the class's file name is also likely. A better convention is to suffix the name of the IDL interface with characters indicating that it is an interface (such as <TT>IF</TT> or <TT>_if</TT>), and apply no 
+suffix to the implementation class. In this example, the IDL interface is then <TT>&quot;NotebookIF&quot;</TT> while the implementation class name is simply <TT>&quot;Notebook&quot;</TT>. This way, if you wish to support the implementation of the 
+<TT>NotebookIF</TT> interface with another, pre-existing class, neither the <TT>Notebook</TT> class nor the additional implementation classes need have their names changed.
+</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE>
+</CENTER>
+<P>
+<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR VALIGN=TOP><TD><B>Tip</B></TD></TR>
+<TR VALIGN=TOP><TD>
+<BLOCKQUOTE>
+When defining IDL functions use <TT>oneway</TT> where possible. CORBA provides the ability to classify IDL functions as <TT>oneway</TT> (as long as they do not have a return value or user defined exceptions). A <TT>oneway</TT> function results in a 
+non-blocking call for the client process. The effect is that a client invoking a <TT>oneway</TT> call will continue processing immediately after the ORB call is made. There is not a wait for the called function to complete. The performance gains on the 
+client side can be significant. There is also less likelihood for deadlock in the event that a server attempts to call back the client as part of its response to call from the client.
+</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE>
+</CENTER>
+<P>
+<P>
+The client applet is a simplified Web-based Notebook allowing
+a user to create, store, retrieve, and display notebooks and notebook
+pages. The core of the applet is the free form drawing pallet
+on which the user types or draws whatever information is necessary.
+All persistent information about the authorized users, notebooks,
+and the contents of their pages is accessed and stored on the
+server's host.
+<P>
+The services of the notebook server are invoked by the client
+applet, depicted in Figure 17.1, using ORB calls from the applet's
+host back to the server's host. The Java-enabled ORB product used
+for the examples in this chapter was <TT>OrbixWeb</TT>.
+It is important to recognize that <TT>OrbixWeb</TT>
+adheres to the security restrictions imposed on Java applets executing
+within Web browsers by only allowing ORB calls back to the host
+from which the applet was dynamically downloaded. As a consequence,
+the Notebook server must reside on the same machine as the Web
+server. This restriction has architectural ramifications which
+will be discussed later in the chapter. A side effect of the necessity
+to select a specific Java-enabled ORB product to create and compile
+the examples in this chapter is that some of the client-side syntax
+presented may be specific to the chosen ORB. However, most, if
+not all, of the points and concepts presented here will apply
+to all reasonably capable Java-enabled ORBs.
+<P>
+<A HREF="f17-1.gif"><B>Figure 17.1 : </B><TT>User</TT><I>
+Interface of the sample Notebook applet</I>.</A>
+<H2><A NAME="CompilingIDLInterfacesforJavaClients"><FONT SIZE=5 COLOR=#FF0000>
+Compiling IDL Interfaces for Java Clients</FONT></A></H2>
+<P>
+In order to write an applet that communicates with a server application
+by way of a CORBA-compliant ORB, clearly there must be a server
+which is CORBA-enabled (for example, a server whose external interface
+is defined using IDL). If the client applet intends to use the
+static invocation interface (SII) to make calls to the target
+server (the dynamic invocation interface, or DII, is discussed
+later in this chapter), then the server's IDL interface definition
+file(s) must be parsed by a Java-capable IDL compiler. This is
+not a minor point, particularly if the server portion of the application
+is not written in Java. For instance, the server for the Notebook
+example is implemented in C++. Clearly the C++ proxy classes generated
+when the server was compiled are useless to the Java client.
+<P>
+When the IDL interface definition file is parsed by the Java IDL
+compiler, one or more Java interface and class source files will
+be generated. These files should be compiled along with the other
+Java applet files and loaded on the Web server. At runtime, the
+resulting ORB support classes will act as proxies, or intermediaries,
+between the client objects and the server's ORB objects. These
+proxies forward all ORB calls made by the client applet to the
+server process and un-marshall all return values.
+<P>
+As indicated in Figure 17.2, the existence of the proxy object
+insulates the user-defined classes from the process of actually
+making the distributed function call. In fact, the reason that
+making an ORB call from a user-defined class is so syntactically
+similar to making a local call is that the user's call is actually
+a call to a local proxy object.
+<P>
+<A HREF="f17-2.gif"><B>Figure 17.2 : </B><I>Client-side proxy objects mediate between
+local client objects and the target server</I>.</A>
+<P>
+When deploying the applet on your Web server, be sure to place
+all necessary ORB related files in their proper directory hierarchies.
+As the applet is loaded and the ORB-related classes are imported,
+the Java-enabled Web browser will look in the directories indicated
+by the standard Java &quot;dot&quot; notation. Listing 17.2 provides
+an example of this statement.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 17.2&nbsp;&nbsp;CHAPT17LISTINGS.TXT-SystemException
+Import Statement<BR>
+
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+import IE.Iona.Orbix2.CORBA.SystemException;
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+This statement tells the class loader to retrieve the file in
+IE/Iona/Orbix2/CORBA/SystemException.class relative to the CODEBASE
+of the applet.
+<P>
+Loading these additional .class files from the Web server to support
+the necessary ORB functionality can consume a significant amount
+of time, many seconds in some cases. And because the Java loader
+is &quot;lazy&quot; (it does not load a class until its services
+are needed by the applet), the applet user may be surprised when
+there is a significant delay in response to a possibly minor input
+event. One reasonable solution is to force the loader to load
+all the necessary ORB-related class files when the applet is initialized.
+This can be accomplished by making a call from the applet's <TT>init()</TT>
+function to one or more functions in the ORB classes to be imported.
+It may also be effective to spawn a lower priority thread which
+performs some operations in the background resulting in the loading
+of the necessary ORB support classes.
+<H2><A NAME="WritingaClientApplet"><FONT SIZE=5 COLOR=#FF0000>
+Writing a Client Applet</FONT></A></H2>
+<P>
+The basic functionality of an ORB is all that is necessary to
+create a very nice client/server application using Java and an
+ORB. The steps to utilize an ORB's basic functionality are really
+pretty simple:
+<OL>
+<LI>Implement code to connect to the server object(s).
+<LI>Implement function calls to the server.
+<LI>Implement exception handling.
+</OL>
+<P>
+The third step here is of heightened importance in a distributed
+application. As suggested by the exception handling requirements
+of the Java.net classes, failure is much more likely when distributed
+interprocess communication is involved than when all object-to-object
+communication occurs in local memory. You will look a bit closer
+at ORB exception handling later in this chapter, but suffice it
+to say that ORB exception handling is not conceptually or syntactically
+different than standard Java exception handling. As a footnote,
+it is likely that Java programmers will more readily adjust to
+the idiosyncrasies of ORB-based programming as a result of their
+exposure to the Java.net classes.
+<P>
+As suggested above, before a call can be invoked on one of the
+ORB-enabled objects in the server, the client must connect or
+otherwise get access to one of these objects. A client can get
+access to a server object in various ways. The most common way
+to initially establish a connection is to <I>bind</I> to the target
+object. In order to accomplish this, the client must provide sufficient
+information to the object request broker to determine the target
+host, server, and object. The function below establishes connectivity
+to the only object in the Notebook server. Because there is only
+one object of type <TT>NotebookIF</TT>
+(the interface type generated by the IDL compiler) in the server,
+you need not specify a specific target object. Providing the host
+name and the server name is sufficient.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 17.3&nbsp;&nbsp;CHAPT17LISTINGS.TXT-Function to Bind
+to the Notebook Server Object<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+NotebookIF.Ref notebookRef;
+
+public boolean bindObject () 
+{ 
+   String hostName = new String(&quot;xxx.xxx.xxx.xxx&quot;); // host name of the target server
+   String markerServer = new String(&quot;:notebookServer&quot;); // name of the target server
+
+   if(notebookRef!=null)                  // if the server object has not already been 	&Acirc;bound
+      return true;
+   else
+   { 
+      // bind to the server object 
+      try {notebookRef = NotebookIF._bind(markerServer, hostName);} 
+      catch (SystemException sysExc) { 
+         showStatus(&quot;ORB Connect failed.&quot; + sysExc.toString ()); 
+         return false;}
+   }
+   showStatus(&quot;ORB Connect succeeded.&quot;);
+   return true; 
+}
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+The primary purpose of the <TT>bindObject()</TT>
+function here is to set the value of <TT>notebookRef</TT>.
+This is the reference to the object in our notebook server. Syntactically,
+this objectreference is used just as any other Java object reference
+is used. And, because your <TT>bindObject()</TT>
+function returns a <TT>boolean</TT>
+flag indicating whether <TT>notebookRef</TT>
+has been set, this function can be called prior to making any
+ORB call. In the event-handling function of the Notebook applet,
+the following function is called as part of the event-handling
+process when you click the Save button.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 17.4&nbsp;&nbsp;CHAPT17LISTINGS.TXT-Client Applet Function
+to Save Note book Page<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+public void savePage(String bookName, String pageName,
+                     String pageContent, String userName,
+                     String password)
+{
+   if(bindObject())  //verify that the server object has been bound
+   { 
+      try{notebookRef.savePage(bookName,
+                               pageName,
+                               pageContent, 
+                               userName,
+                               password);}  // make the ORB call
+      catch(SystemException sysExc) {
+         showStatus(&quot;ORB Call to savePage failed&quot;);return;}
+      //...handle other exceptions ...
+      showStatus(&quot;Notebook Page Saved&quot;);   // indicate that the page has been saved
+   } 
+   else
+   {
+      showStatus(&quot;Error in ORB Connection.&quot;);
+   }
+}
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+Similarly, in the event-handling function of the Notebook applet,
+the following function is called as part of the event-handling
+process when the Open Page button is pressed.
+<P>
+The ability shown in Listing 17.5 to bind to a server-side ORB
+object and to use the resulting object reference to make a heterogeneous,
+interprocess ORB call is the fundamental functionality provided
+to a CORBA-enabled client. While most object request brokers provide
+a greate deal of functionality, you can use this basic &quot;bind
+and call&quot; functionality to perform most client-side operations
+<HR>
+<BLOCKQUOTE>
+<B>Listing 17.5&nbsp;&nbsp;CHAPT17LISTINGS.TXT-Client Applet Function
+to Open a Notebook Page<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+public void openPage(String pageName, String bookName, String userName, String password)
+{
+    String content;
+    if(bindObject())  //verify that the server object has been bound
+    { 
+       try{content = notebookRef.retrievePage(bookName,
+                                              pageName, 
+                                              userName,
+                                              password);}  // make the ORB call 
+       catch(SystemException exc) {
+          showStatus(&quot;ORB Call to retrievePage failed&quot;);return;}
+       //...handle other exceptions ...
+       notepad.openPage(content);  // open the Page on the Canvas
+    } 
+    else
+    {
+       showStatus(&quot;Error in ORB Connection.&quot;);
+    }
+} 
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<H2><A NAME="HandlingExceptions"><FONT SIZE=5 COLOR=#FF0000>
+Handling Exceptions</FONT></A></H2>
+<P>
+Not surprisingly, most Java IDL compilers generate exception classes
+which inherit 
+from <TT>java.lang.Exception</TT>.
+It is this inheritance which enables any ORB exception to be handled
+in the same manner as any other Java exception. Recall that one
+of the functions in the <TT>NotebookIF</TT>
+IDL interface is the <TT>retrievePage()</TT>
+function that can generate three user-defined exceptions. The
+IDL shown in Listing 17.6 is a restatement of that function definition.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 17.6&nbsp;&nbsp;CHAPT17LISTINGS.TXT-IDL Definition
+of retrievePage Function with Exceptions<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+string retrievePage(in string bookName, in string pageName,
+                    in string userName, in string password) 
+                    raises(AccessNotAuthorizedExc,
+                           NoSuchPageExc,
+                           NoSuchBookExc);
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+The IDL compiler generates the Java code shown in Listing 17.1
+for the definition of this function, as shown in Listing 17.7.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 17.7&nbsp;&nbsp;CHAPT17LISTINGS.TXT-Java Code Generated
+from IDL Definition of savePage Function<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+public String retrievePage(String bookName, String pageName,
+                           String userName, in string password) 
+                           throws NotebookIF.AccessNotAuthorizedExc,
+                                  NotebookIF.NoSuchPageExc, 
+                                  NotebookIF.NoSuchBookExc,
+                                  IE.Iona.Orbix2.CORBA.SystemException;
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+Notice that the generated Java function definition has an additional
+exception defined, <TT>CORBA.SystemException</TT>.
+This is necessary due to the various CORBA-defined exceptions
+which may be thrown by an attempt to make a CORBA ORB call. For
+a complete list of these exceptions, refer to the documentation
+for your ORB and the CORBA specification.
+<P>
+In order to pass compilation, your code must handle all potential
+exceptions. Therefore, the complete code for your client's <TT>openPage()</TT>
+function is shown in Listing 17.8.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 17.8&nbsp;&nbsp;CHAPT17LISTINGS.TXT-Client Applet openPage
+Function with all Exceptions Handled<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+public void openPage(String pageName, String bookName, String userName, String password)
+{
+    String content;
+    if(bindObject())  //verify that the server object has been bound
+    { 
+       try{content = notebookRef.retrievePage(bookName,
+                                              pageName, 
+                                              userName,
+                                              password);}  // make the ORB call 
+       catch(NotebookIF.AccessNotAuthorizedExc noAccess) {
+          showStatus(&quot;User access denied.  Page Note Retrieved&quot;);return;}
+       catch(NotebookIF.NoSuchPageExc noPage) {
+          showStatus(&quot;No such notebook page:  &quot; + noPage.pageName&quot;);return;} 
+       catch(NotebookIF.NoSuchBookExc noBook) {
+          showStatus(&quot;No such notebook:  &quot; + noBook.bookName&quot;);return;}
+       catch(SystemException sysExc) {
+          showStatus(&quot;ORB Call to retrievePage failed&quot;);return;}
+
+       notepad.openPage(content);  // open the Page on the Canvas
+    } 
+    else
+    {
+       showStatus(&quot;Error in ORB Connection.&quot;);
+    }
+} 
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+If you have experience handling Java exceptions, the above exception-handling
+code will look very familiar. Each of the four possible exceptions
+is handled. For each exception, a status message is sent to the
+browser. Where the exception populates an exception attribute,
+that attribute is concatenated to the status message.<BR>
+<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR VALIGN=TOP><TD><B>Note</B></TD></TR>
+<TR VALIGN=TOP><TD>
+<BLOCKQUOTE>
+As noted earlier in this chapter, it is advantageous to define IDL functions <TT>oneway </TT>(non-blocking). This is due to the performance gains resulting from the client processes' ability to continue processing immediately following an ORB call. An 
+unfortunate side effect of defining one or more exceptions for an IDL function is that you then lose the option to make it <TT>oneway</TT>. An IDL function that may raise a user-defined exception cannot be non-blocking. Therefore, if client-side 
+responsiveness is of particular importance to your application, it may be advantageous to define an <TT>exception callback</TT> IDL interface in your client, remove all exceptions from your server's IDL function definitions, and make them <TT>oneway</TT>. 
+
+Then, code your server such that if the need arises to raise a user-defined exception, it calls the client's exception callback interface to asynchronously notify it of the problem.
+</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE>
+</CENTER>
+<P>
+<H2><A NAME="CGIProgramsJavanetandJavaioMayNotBetheBestChoices"><FONT SIZE=5 COLOR=#FF0000>
+CGI Programs, Java.net.*, and Java.io.* May Not Be the Best
+Choices</FONT></A></H2>
+<P>
+CGI programs have formed an invaluable function in bringing information
+and functionality to the Web. CGI programs, in concert with several
+of the Java.net classes (<TT>URL</TT>,
+<TT>URLConnection</TT>, <TT>DataInputStream</TT>,
+and <TT>DataOutputStream</TT>), are
+one of the primary mechanisms many Java developers use to communicate
+with a server. However, in many instances, an object-request broker
+provides a much more flexible and efficient solution to server-side
+connectivity than the combination of <TT>Java.net.*</TT>/<TT>Java.io.*</TT>
+and CGI.
+<P>
+The advantages of CORBA over CGI and <TT>Java.net.*</TT>
+for server communication center around the simplicity of basic
+CORBA-based client/server interactions and the wide applicability
+of a CORBA-based server. This is in contrast to the cumbersome
+nature of CGI and <TT>Java.net.*</TT>
+client/server interactions and the limited applicability of a
+CGI-based server. More specifically, because the CGI protocol
+only supports input and output parameters by way of environment
+variables and standard input/output, all parameters must be packaged
+into and out of string form. Of course, CORBA has no such limitation.
+Parameters may be passed as any of the basic IDL types (short,
+float, string, sequence, and so on), or as any complex type defined
+in the server's interface definition. The CGI protocol does not
+inherently support the invocation of a specific function. As a
+result, the Web site designer must build and manage several CGI
+programs, each specifically designed either to perform a single
+function or write one or more multipurpose CGI programs. In the
+latter case, the invoked CGI program must parse the string-based
+input parameters passed to it in order to determine the desired
+function.
+<P>
+CORBA allows a Web client to make a very specific function call
+to a very specific object in a server program using a very natural
+syntax. Additionally, most existing server applications were not
+written to support CGI access, and modifying a server application
+to support CGI access seems to be an unnecessarily narrow and
+cumbersome solution to the broader problem of supporting client
+interactions with a given server. On the other hand, many existing
+server applications already provide client access via a CORBA
+layer. But even where a server application is not CORBA-enabled,
+CORBA is a much more generic, extensible, and efficient solution
+to providing client/server access to data and functionality. The
+final benefit of CORBA over CGI and <TT>Java.net.*</TT>
+is that making a CORBA call in Java is simply less problematic
+than the corresponding <TT>Java.net.*</TT>
+calls. There is no need for the use of the <TT>URL</TT>,
+<TT>URLConnection</TT>, <TT>DataInputStream</TT>,
+and <TT>DataOutputStream</TT> classes.
+<P>
+Consider the example of passing a user name and password to a
+server program and getting back a list of notebook names to support
+your notebook applet. Listing 17.9 uses the <TT>Java.net.*</TT>
+and <TT>Java.io.*</TT> classes to
+establish a connection with a CGI program on the server, pass
+the user name and password to the CGI, and read the CGI output.
+Once the string containing the list of books is read from the
+input stream, the string must be unpacked (tokenized) to display
+each notebook name in a Java ListItem.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 17.9&nbsp;&nbsp;CHAPT17LISTINGS.TXT-Using Java.net.*
+and Java.io.* to Pass Data to and Read from a CGI<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+String books;
+String userInfo = new String(userName + &quot;|&quot; + password);
+URLEncoder.encode(userInfo);
+
+try{
+
+   booksURL = new URL(this.getDocumentBase(),&quot;CGIToGetListOfNotebooks&quot;);
+   conn = booksURL.openConnection();
+   conn.setUseCaches(false);
+   outStream = new PrintStream(conn.getOutputStream());
+   outStream.println(&quot;string=&quot;+userInfo);
+   outStream.clo

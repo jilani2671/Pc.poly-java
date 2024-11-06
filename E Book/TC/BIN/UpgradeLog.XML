@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type='text/xsl' href='_UpgradeReport_Files/UpgradeReport.xslt'?><UpgradeLog>
+<Properties><Property Name="Solution" Value="BUILTINS">
+</Property><Property Name="Solution File" Value="C:\TC\BIN\BUILTINS.sln">
+</Property><Property Name="Date" Value="Thursday, July 26, 2012">
+</Property><Property Name="Time" Value="19:06:52 PM">
+</Property></Properties><Event ErrorLevel="2" Project="C:\TC\BIN\BUILTINS.MAK" Source="BUILTINS" Description="Cannot load the project due to a corrupt project file.">
+</Event><Event ErrorLevel="2" Project="BUILTINS" Source="BUILTINS.MAK" Description="Project upgrade failed.">
+</Event><Event ErrorLevel="3" Project="BUILTINS" Source="BUILTINS.MAK" Description="Not Converted">
+</Event></UpgradeLog>

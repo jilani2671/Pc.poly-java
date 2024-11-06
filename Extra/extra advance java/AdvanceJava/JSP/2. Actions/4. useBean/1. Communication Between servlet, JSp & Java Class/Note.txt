@@ -1,0 +1,8 @@
+Store JSP Page in:-- 
+C:\Tomcat\webapps\examples
+
+Store Servlet class in:-- 
+C:\Tomcat\webapps\examples\WEB-INF\classes
+
+Store core java class in:-- 
+C:\Tomcat\webapps\examples\WEB-INF\classes\mypack

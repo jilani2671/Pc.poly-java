@@ -1,0 +1,15 @@
+Servlet Registartion:--
+<servlet>
+        <servlet-name>YourServlet</servlet-name>
+        <servlet-class>MyServlet</servlet-class>
+    </servlet>
+
+
+Servlet Mapping :--
+<servlet-mapping>
+        <servlet-name>YourServlet</servlet-name>
+        <url-pattern>/sachin/HisServlet</url-pattern>
+    </servlet-mapping>
+
+Execution Path :--
+http://localhost:8081/examples/sachin/HisServlet

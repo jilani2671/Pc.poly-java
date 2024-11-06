@@ -1,0 +1,6 @@
+Sachin\source>javac -d ../classes FDemo.java
+
+Create manifest.txt:--
+Main-Class: FDemo
+
+Sachin\classes>jar -cvmf manifest.txt myjar.jar *.class

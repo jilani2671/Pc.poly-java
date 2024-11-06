@@ -1,0 +1,36 @@
+
+SQL> select * from product1;
+
+PTYPE
+-------------------------
+PDIS
+---------------------------------------------------------------
+
+       PID
+----------
+consumable
+this product is consumabe
+         1
+
+nonconsumable
+this product is nonconsumable
+         2
+
+PTYPE
+-------------------------
+PDIS
+--------------------------------------------------------------
+
+       PID
+----------
+
+
+SQL> desc product1
+ Name                                      Null?    Type
+ ----------------------------------------- -------- ----------------
+
+ PTYPE                                              VARCHAR2(25)
+ PDIS                                               VARCHAR2(100)
+ PID                                                NUMBER(2)
+
+SQL>

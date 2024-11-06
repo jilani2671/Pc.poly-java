@@ -1,0 +1,12 @@
+
+SQL> select * from Product_info;
+
+PNAME                               PRICE MATERIAL
+------------------------------ ---------- ------------
+Get Way of c                          150 S.S.
+JSP                                   200 H.C.S.
+ASP.NET                               250 S.S.
+JAVA                                  250 H.C.
+OOPS                                  300 S.S.
+
+SQL>

@@ -1,0 +1,14 @@
+
+SQL> desc product
+ Name                                      Null?    Type
+ ----------------------------------------- -------- ------------------------
+
+ PID                                                NUMBER(2)
+ PNAME                                              VARCHAR2(25)
+ PPRICE                                             NUMBER(5)
+ PMATERIAL                                          VARCHAR2(25)
+ PTYPE                                              VARCHAR2(25)
+ PDISCRIPTION                                       VARCHAR2(100)
+
+SQL>
+
